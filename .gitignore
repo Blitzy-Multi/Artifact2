@@ -1,6 +1,3 @@
-# Node.js dependencies (installed via `npm install`; resolved versions are
-# pinned in package-lock.json, so node_modules/ does not belong in version control).
+# Node.js install artifacts
 node_modules/
-
-# npm debug / error logs
 npm-debug.log*
