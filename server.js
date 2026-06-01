@@ -24,6 +24,16 @@ const express = require('express');
 const app = express();
 
 /**
+ * Security hardening: do not advertise the framework in responses.
+ *
+ * Express sets an `X-Powered-By: Express` response header by default. Disabling
+ * it removes that fingerprinting header from every response. This uses a
+ * built-in Express application setting (`app.disable`) — it introduces no
+ * dependency and no middleware.
+ */
+app.disable('x-powered-by');
+
+/**
  * Listening port.
  *
  * Defaults to 3000 (the de facto Express tutorial convention) and is
@@ -31,6 +41,24 @@ const app = express();
  * environments that inject a port at runtime.
  */
 const PORT = process.env.PORT || 3000;
+
+/**
+ * Method guard — serve only HTTP GET.
+ *
+ * The behavioral contract for this server is exactly two GET endpoints
+ * (`GET /` and `GET /good-evening`). Express otherwise answers HEAD and OPTIONS
+ * for GET routes implicitly, which would expose HTTP method responses beyond
+ * those two routes. This guard runs before the route handlers — and before the
+ * router's implicit HEAD/OPTIONS handling — so every non-GET request (HEAD,
+ * OPTIONS, POST, PUT, PATCH, DELETE, ...) receives a 404 and only GET requests
+ * reach the routes below.
+ */
+app.use((req, res, next) => {
+  if (req.method !== 'GET') {
+    return res.sendStatus(404);
+  }
+  next();
+});
 
 /**
  * Baseline endpoint.

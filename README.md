@@ -3,7 +3,7 @@
 ## Overview
 
 This is a tutorial project: a minimal Node.js HTTP greeting server built with the
-[Express](https://www.npmjs.com/package/express) framework. It exposes two `GET`
+[Express](https://expressjs.com/) framework. It exposes two `GET`
 endpoints — `/`, which responds with `Hello world`, and `/good-evening`, which
 responds with `Good evening`. The goal is to demonstrate, end to end, how to install
 Express, run a server, and call its routes. (Source: `server.js`)
@@ -67,18 +67,15 @@ Behavior is defined in the `server.js` route handlers. (Source: `server.js`)
 ## Examples
 
 With the server running (see [Running the Server](#running-the-server)), invoke each
-endpoint with `curl`:
+endpoint with `curl`. Each command is shown after a `$` prompt; the line beneath it is
+the exact response body returned by the server.
 
 ```bash
-# Baseline endpoint
-curl http://localhost:3000/
-# Response:
-# Hello world
+$ curl http://localhost:3000/
+Hello world
 
-# New endpoint
-curl http://localhost:3000/good-evening
-# Response:
-# Good evening
+$ curl http://localhost:3000/good-evening
+Good evening
 ```
 
 ## Project Structure
