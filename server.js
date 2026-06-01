@@ -62,6 +62,3 @@ app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server is listening on http://localhost:${PORT}`);
 });
-
-// Export the app instance to support programmatic use (e.g., future testing).
-module.exports = app;
