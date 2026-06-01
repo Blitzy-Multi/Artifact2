@@ -66,8 +66,6 @@ imports :mod:`app.config` at module top, the ``.env`` file is loaded before
 :func:`app.config.get_config`; no secrets are hardcoded here (AAP Section 0.7).
 """
 
-import os
-
 from flask import Flask
 
 # Absolute imports only (AAP Sections 0.3.2 and 0.7); never relative. Each of
@@ -138,13 +136,6 @@ def create_app(config_name: str | None = None) -> Flask:
     # the active profile; subclasses (or future source-derived configuration)
     # may override it to add environment-specific setup.
     selected_config.init_app(app)
-
-    # Ensure Flask's instance folder exists. This is standard, idiomatic Flask
-    # factory plumbing (the application's writable, deploy-local directory for
-    # instance configuration and runtime files); it is infrastructure only and
-    # introduces NO route, model, or externally observable behavior. ``exist_ok``
-    # makes the call an idempotent no-op when the folder is already present.
-    os.makedirs(app.instance_path, exist_ok=True)
 
     # (3) Initialize extensions.
     #
