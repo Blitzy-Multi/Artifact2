@@ -49,6 +49,20 @@ minversion = "9.0"
 # (e.g. transient scratch files at the repo root) are never collected.
 testpaths = ["tests"]
 
+# Put the repository root on ``sys.path`` for the duration of the test session
+# so the application package is importable as ``app`` no matter how pytest is
+# launched. The fixtures in ``tests/conftest.py`` do ``from app import
+# create_app``; that import only resolves if the repo root is on ``sys.path``.
+# Invoking ``python -m pytest`` happens to add the current directory
+# automatically, but the bare ``pytest`` console-script entrypoint does NOT --
+# so without this setting ``pytest`` (and ``pytest --collect-only``) fail at
+# conftest import with ``ModuleNotFoundError: No module named 'app'``. Listing
+# the repo root here (``"."`` is resolved relative to this file's rootdir) makes
+# every documented invocation -- ``pytest``, ``pytest --collect-only``, and
+# ``python -m pytest`` -- behave identically. (``pythonpath`` is a first-class
+# pytest ini option since pytest 7.0; the project pins pytest==9.0.3.)
+pythonpath = ["."]
+
 # Standard discovery rules -- mirror the suite's file/class/function naming.
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

@@ -114,9 +114,25 @@ def create_app(config_name: str | None = None) -> Flask:
         a WSGI server or driven by the test client.
     """
     # (1) Instantiate the core Flask application. ``__name__`` anchors Flask's
-    # root path so it can locate the package's ``instance``, ``static``, and
-    # ``templates`` folders relative to this module.
-    app = Flask(__name__)
+    # root path so it can locate package-relative resources (e.g. the
+    # ``instance`` and ``templates`` folders) relative to this module.
+    #
+    # ``static_folder=None`` DISABLES Flask's built-in static endpoint. By
+    # default ``Flask(__name__)`` registers a ``/static/<path:filename>`` route
+    # (GET/HEAD/OPTIONS), which is an externally observable, source-unspecified
+    # API surface. The original Node.js server is not yet present, and the
+    # parity mandate forbids fabricating any endpoint or static surface that the
+    # source has not been shown to expose (AAP Sections 0.6.2 and 0.7:
+    # *nothing invented, nothing dropped*). Disabling it keeps the foundation
+    # truly "empty-but-bootable": the URL map contains no routes, so a request
+    # to any path -- ``/static/...`` included -- uniformly returns the scaffold
+    # 404 JSON envelope regardless of HTTP method.
+    #
+    # If inspection of the supplied Node.js source later proves that static
+    # assets were served, re-enable static serving here ONE-TO-ONE with the
+    # original (matching its URL prefix, on-disk folder, and cache/middleware
+    # semantics) by passing ``static_folder``/``static_url_path`` accordingly.
+    app = Flask(__name__, static_folder=None)
 
     # (2) Load configuration.
     #

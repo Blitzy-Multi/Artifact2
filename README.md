@@ -6,7 +6,7 @@ A **Python 3 + [Flask](https://flask.palletsprojects.com/)** rewrite of an exist
 >
 > **The original Node.js source that this project ports is not present in this repository.** A faithful, functionality‑preserving port is defined entirely by the source it mirrors, so the **resource‑specific** parts of the application — the concrete endpoints, data models, services, validation schemas, and their tests — **cannot be implemented until the original Node.js source is supplied.**
 >
-> What exists today is the **source‑agnostic foundation layer** of that scaffold: environment‑driven configuration (`app/config.py`), a shared‑extensions module (`app/extensions.py`), request‑lifecycle hooks and centralized error handlers (`app/middleware/`), and a blueprint registry (`app/blueprints/__init__.py`) — together with the project manifests (`requirements.txt`, `.env.example`, `pyproject.toml`, `.gitignore`). The pieces that make the application **bootable end‑to‑end** — the `create_app()` application factory (`app/__init__.py`), the WSGI entrypoint (`wsgi.py`), and the pytest fixtures (`tests/conftest.py`) — are added in the next step, so the application is **not yet runnable as a whole**. No endpoints, models, or business rules are documented here because none are known yet — and inventing any would violate the parity mandate (*"nothing is invented and nothing is dropped"*).
+> What exists today is the **complete source‑agnostic foundation** of that scaffold: environment‑driven configuration (`app/config.py`), a shared‑extensions module (`app/extensions.py`), request‑lifecycle hooks and centralized error handlers (`app/middleware/`), and a blueprint registry (`app/blueprints/__init__.py`); the pieces that make the application **bootable end‑to‑end** — the `create_app()` application factory (`app/__init__.py`), the WSGI entrypoint (`wsgi.py`), and the pytest fixtures (`tests/conftest.py`); and the project manifests (`requirements.txt`, `.env.example`, `pyproject.toml`, `.gitignore`). **The scaffold boots today** under Flask/gunicorn and the pytest suite collects cleanly — but it is **not yet a functional behavioral‑parity port**: it deliberately exposes no application endpoints, models, or business rules, because none are known until the original Node.js source is supplied, and inventing any would violate the parity mandate (*"nothing is invented and nothing is dropped"*).
 >
 > **To complete the port:** add the original Node.js project to the repository (or provide it as an attachment). Each Express router, model, middleware, and `process.env.*` value then maps one‑to‑one onto its Flask equivalent (see [Porting Methodology](#porting-methodology)).
 
@@ -32,13 +32,13 @@ Transitive libraries installed automatically with Flask — **Werkzeug, Jinja2, 
 
 ## Project Structure
 
-The application follows the idiomatic Flask **application‑factory** pattern with **Blueprints**, a centralized configuration class, and a shared‑extensions module. The intended layout is shown below. Each entry is annotated **`[present]`** (exists in the repository at this checkpoint), **`[next]`** (part of the application‑wiring step that makes the app bootable — added next), or *“populated once the Node.js source is provided”* (**resource‑specific**, and therefore empty until the original source is supplied).
+The application follows the idiomatic Flask **application‑factory** pattern with **Blueprints**, a centralized configuration class, and a shared‑extensions module. The layout is shown below. Each entry is annotated **`[present]`** (exists in the repository today) or *“populated once the Node.js source is provided”* (**resource‑specific**, and therefore empty until the original source is supplied).
 
 ```text
 .
-├── wsgi.py                     # Production WSGI entrypoint: app = create_app()        [next]
+├── wsgi.py                     # Production WSGI entrypoint: app = create_app()        [present]
 ├── app/                        # Application package
-│   ├── __init__.py             #   create_app() factory: config, extensions, blueprints, error handlers   [next]
+│   ├── __init__.py             #   create_app() factory: config, extensions, blueprints, error handlers   [present]
 │   ├── config.py               #   Env-driven Config classes (host, port, secrets, debug)   [present]
 │   ├── extensions.py           #   Shared singletons (cors today; db/jwt/limiter later)     [present]
 │   ├── blueprints/             #   Blueprint registry today; one Blueprint per router later
@@ -50,8 +50,8 @@ The application follows the idiomatic Flask **application‑factory** pattern wi
 │   │   ├── hooks.py            #     before/after_request hooks (no-op today)            [present]
 │   │   └── error_handlers.py   #     JSON error-envelope handlers                        [present]
 │   └── utils/                  #   Shared helpers (JWT, hashing, pagination, ...)   ← populated once the Node.js source is provided
-├── tests/                      # Test suite                                              [next]
-│   ├── conftest.py             #   Shared fixtures (app, test client, database)          [next]
+├── tests/                      # Test suite                                              [present]
+│   ├── conftest.py             #   Shared fixtures (app, test client, CLI runner)        [present]
 │   ├── unit/                   #   Fast service/model unit coverage                 ← populated once the Node.js source is provided
 │   └── integration/            #   Endpoint/contract coverage reproducing originals ← populated once the Node.js source is provided
 ├── requirements.txt            # Pinned Python dependencies (core + commented conditional tier)   [present]
@@ -60,9 +60,9 @@ The application follows the idiomatic Flask **application‑factory** pattern wi
 └── .gitignore                  # Python ignore patterns (.venv, __pycache__, .env, ...)             [present]
 ```
 
-> **Currently present (this checkpoint):** the project manifests — `requirements.txt`, `.env.example`, `pyproject.toml`, `.gitignore`, and this `README.md` — plus the foundation modules inside `app/`: `app/config.py`, `app/extensions.py`, `app/blueprints/__init__.py`, `app/middleware/hooks.py`, and `app/middleware/error_handlers.py`.
+> **Present today (the complete foundation):** the project manifests — `requirements.txt`, `.env.example`, `pyproject.toml`, `.gitignore`, and this `README.md` — the foundation modules inside `app/` (`app/config.py`, `app/extensions.py`, `app/blueprints/__init__.py`, `app/middleware/hooks.py`, `app/middleware/error_handlers.py`), **and the bootability pieces**: the `create_app()` factory (`app/__init__.py`), the `wsgi.py` entrypoint, and the `tests/` fixtures (`tests/conftest.py`). The application boots under Flask/gunicorn and the run/test commands below work today.
 >
-> **Created next:** the `create_app()` factory (`app/__init__.py`), the `wsgi.py` entrypoint, and the `tests/` fixtures (`tests/conftest.py`) — at which point the application becomes bootable and the run/test commands below apply. The **resource‑specific** modules (blueprints, models, services, schemas, utils, and their tests) are then filled in one‑to‑one against the original source once it is supplied.
+> **Populated once the Node.js source is provided:** the **resource‑specific** modules (blueprints, models, services, schemas, utils, and their tests), filled in one‑to‑one against the original source.
 
 ---
 
@@ -115,7 +115,7 @@ cp .env.example .env
 
 ## Running the Application
 
-> **Note (current checkpoint):** the commands below become operational once the `create_app()` factory (`app/__init__.py`) and the `wsgi.py` entrypoint are added (see [Project Structure](#project-structure)). At this checkpoint the foundation modules are present, but the application is not yet wired for boot.
+> **Note:** the commands below work today — the `create_app()` factory (`app/__init__.py`) and the `wsgi.py` entrypoint are present and wired, so the scaffold boots under Flask/gunicorn. It serves **no application routes yet** (none are known until the original Node.js source is supplied); any request to an unknown path returns the scaffold's JSON 404 error envelope.
 
 ### Production
 
@@ -156,7 +156,7 @@ pytest -m unit
 pytest -m "not integration"
 ```
 
-The suite asserts **input/output parity** at both the unit level (services/models) and the integration level (HTTP routes), so that identical inputs produce identical outputs to the original server. The pytest configuration is already in place; the `tests/` tree (including `conftest.py`) is added in the application‑wiring step noted above, so until then a repository‑level `pytest` run collects no tests.
+The suite asserts **input/output parity** at both the unit level (services/models) and the integration level (HTTP routes), so that identical inputs produce identical outputs to the original server. The pytest configuration and the `tests/` tree are in place: `tests/conftest.py` ships the source‑agnostic `app`, `client`, and `runner` fixtures, and a repository‑level `pytest` run collects cleanly. The per‑resource `tests/unit/` and `tests/integration/` cases are added one‑to‑one once the original Node.js source is supplied, so a bare `pytest` run currently reports **no tests collected** (an expected, healthy state for the foundation).
 
 ---
 
