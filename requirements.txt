@@ -1,24 +1,75 @@
-# Python dependencies for the Artifact2 Flask application.
+# ============================================================================
+# Python dependency manifest for the Artifact2 Flask application.
 #
-# Runtime: Python 3.13 (Flask 3.1.x requires Python >= 3.9).
-# Version pins were verified against PyPI as the current latest stable releases.
+# Project: Node.js (Express) -> Python 3 / Flask port (see AAP Section 0.3).
+# Runtime: Python >= 3.12 recommended (Flask 3.1.x requires Python >= 3.9).
 #
-# This project is a Node.js (Express) -> Python 3 / Flask port (see AAP §0.3).
-# The original Express server is a minimal greeting server whose only runtime
-# dependency is `express`. Therefore ONLY the CORE web stack is required here.
-# The AAP's CONDITIONAL packages (Flask-SQLAlchemy, SQLAlchemy, Flask-PyMongo,
-# PyMongo, PyJWT, bcrypt, marshmallow, requests, Flask-SocketIO, Flask-Limiter)
-# are intentionally omitted because the original source uses none of them.
+# All version pins are EXACT (==) and were verified against PyPI as current
+# stable releases (AAP Section 0.3.1). Do not change a version without
+# re-verifying it against the package index.
+#
+# ----------------------------------------------------------------------------
+# Two tiers of dependencies:
+#
+#   1. CORE tier (ACTIVE, below): the unconditional web stack required by ANY
+#      Flask port -- framework, production WSGI server, environment-variable
+#      loading, CORS, and the test runner. These install today.
+#
+#   2. CONDITIONAL tier (COMMENTED OUT, at the bottom): candidate replacements
+#      for the typical Node.js libraries (database driver, auth, validation,
+#      realtime, rate limiting). They are intentionally inert because the
+#      original Node.js project -- and therefore its package.json -- is NOT yet
+#      present in this repository (AAP Section 0.1 "Critical Precondition").
+#      The concrete subset cannot be selected without that source. Once the
+#      original package.json is supplied, uncomment exactly the lines whose
+#      Node.js trigger (noted per line) the original actually used; this maps
+#      the dependency set 1:1 to the source (AAP Section 0.3, Section 0.6.3).
 #
 # Transitive libraries installed automatically by Flask (Werkzeug, Jinja2,
-# MarkupSafe, ItsDangerous, Click, Blinker) are governed by Flask's own
-# constraints and are not pinned separately.
+# MarkupSafe, ItsDangerous, Click, Blinker) are governed by Flask's own version
+# constraints and are deliberately NOT pinned here (AAP Section 0.3.1).
+# ============================================================================
 
-# --- Core web framework / runtime ---
+# --- Core web framework / runtime (replaces express + node runtime) ---
 Flask==3.1.3
-Flask-Cors==6.0.2
-python-dotenv==1.2.2
 gunicorn==26.0.0
+python-dotenv==1.2.2
+Flask-Cors==6.0.2
 
-# --- Testing ---
+# --- Testing (dev/test) ---
 pytest==9.0.3
+
+# ============================================================================
+# CONDITIONAL CANDIDATES -- DO NOT INSTALL UNTIL SELECTED.
+#
+# Each line below stays commented (inert; ignored by pip) until the original
+# Node.js package.json is inspected. Uncomment only the lines matching the
+# libraries the original used, then re-run `pip install -r requirements.txt`.
+# Versions are AAP-verified (Section 0.3.1).
+# ============================================================================
+
+# --- SQL data layer (uncomment if the original used sequelize / knex / pg / mysql2) ---
+# Flask-SQLAlchemy==3.1.1
+# SQLAlchemy==2.0.50
+
+# --- MongoDB data layer (uncomment if the original used mongoose / mongodb) ---
+# Flask-PyMongo==3.0.1
+# PyMongo==4.17.0
+
+# --- Authentication (uncomment if the original used jsonwebtoken) ---
+# PyJWT==2.13.0
+
+# --- Password hashing (uncomment if the original used bcrypt / bcryptjs) ---
+# bcrypt==5.0.0
+
+# --- Request validation / serialization (uncomment if the original used joi / express-validator) ---
+# marshmallow==4.3.0
+
+# --- Outbound HTTP client (uncomment if the original used axios / node-fetch) ---
+# requests==2.34.2
+
+# --- Realtime / websockets (uncomment if the original used socket.io) ---
+# Flask-SocketIO==5.6.1
+
+# --- Rate limiting / throttling (uncomment if the original used express-rate-limit) ---
+# Flask-Limiter==4.1.1
