@@ -47,7 +47,7 @@ Hard contracts (coordination with already-created files -- match EXACTLY)
    authoritative configuration source instead of a split CLI-only set. The
    defaults below match the ``.env.example`` placeholders exactly:
    ``FLASK_APP=wsgi.py``, ``FLASK_DEBUG=0`` (off), ``APP_CONFIG=development``,
-   ``SECRET_KEY`` placeholder, ``HOST=0.0.0.0``, and ``PORT=3000``.
+   ``SECRET_KEY`` placeholder, ``HOST=0.0.0.0``, and ``PORT=8000``.
 2. ``app/__init__.py`` calls ``get_config(config_name)`` and feeds the result to
    ``app.config.from_object(...)``; this module therefore exposes
    :func:`get_config` alongside the config classes.
@@ -179,11 +179,13 @@ class Config:
     # TCP port the server listens on. Parsed through ``_get_int_env`` so a
     # MISSING *or* MALFORMED value (e.g. ``PORT=not_an_int``) safely falls back
     # to the default instead of raising ``ValueError`` at import time and
-    # crashing the application before it can start. The default ``3000`` mirrors
-    # the original Express server's ``process.env.PORT`` default and matches both
-    # ``.env.example`` (PORT=3000) and the README run examples
-    # (``gunicorn --bind 0.0.0.0:3000 wsgi:app``).
-    PORT = _get_int_env("PORT", 3000)
+    # crashing the application before it can start. The default ``8000`` is the
+    # conventional port for Python WSGI servers (it matches gunicorn's own
+    # default bind) and is used here as the source-agnostic scaffold default; it
+    # is adjusted to the original project's listening port once that source is
+    # supplied. It matches both ``.env.example`` (PORT=8000) and the README run
+    # examples (``gunicorn --bind 0.0.0.0:8000 wsgi:app``).
+    PORT = _get_int_env("PORT", 8000)
 
     # ``FLASK_DEBUG`` toggle, consumed here under its EXACT env key name so the
     # active ``.env.example`` key maps 1:1 onto this configuration surface

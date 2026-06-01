@@ -15,7 +15,7 @@ The application object is exposed as ``app`` so the standard WSGI server target
 ``wsgi:app`` resolves directly::
 
     gunicorn wsgi:app
-    gunicorn --bind 0.0.0.0:3000 --workers 4 wsgi:app
+    gunicorn --bind 0.0.0.0:8000 --workers 4 wsgi:app
 
 gunicorn imports this module, reads the module-level ``app`` object, and serves
 it. It NEVER executes the ``if __name__ == "__main__":`` block below -- that
@@ -74,19 +74,21 @@ if __name__ == "__main__":
     # only; it must not be used to serve production traffic.
     #
     # HOST / PORT are read from the environment with safe defaults that mirror
-    # ``app/config.py`` and ``.env.example`` (HOST=0.0.0.0, PORT=3000 -- the
-    # latter mirroring the original Express server's ``process.env.PORT``
-    # default). The factory has already loaded any local ``.env`` (through
+    # ``app/config.py`` and ``.env.example`` (HOST=0.0.0.0, PORT=8000 -- the
+    # latter being the conventional Python WSGI default, matching gunicorn's
+    # own default bind, used as the source-agnostic scaffold default; it is
+    # adjusted to the original project's listening port once that source is
+    # supplied). The factory has already loaded any local ``.env`` (through
     # ``app.config``), so these reads agree with the running configuration.
     host = os.environ.get("HOST", "0.0.0.0")
     try:
         # ``PORT`` is always a string in the environment; coerce it to int.
-        port = int(os.environ.get("PORT", "3000"))
+        port = int(os.environ.get("PORT", "8000"))
     except ValueError:
         # Tolerate a malformed ``PORT`` (e.g. ``PORT=not_an_int``) by falling
         # back to the documented default instead of crashing the dev runner --
         # the same safe-default behavior ``app/config.py`` applies at import.
-        port = 3000
+        port = 8000
 
     # ``debug`` is intentionally NOT passed here: the active configuration
     # profile (loaded by the factory into ``app.config["DEBUG"]``) already

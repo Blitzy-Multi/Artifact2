@@ -21,7 +21,7 @@ The application targets **Python 3** (recommended **≥ 3.12**; Flask 3.1.x requ
 | [Flask](https://flask.palletsprojects.com/) | `3.1.3` | Web framework and routing | `express` |
 | [gunicorn](https://gunicorn.org/) | `26.0.0` | Production WSGI server | `node` / `pm2` runtime |
 | [python-dotenv](https://github.com/theskumar/python-dotenv) | `1.2.2` | Loads environment variables from `.env` | `dotenv` |
-| [Flask-Cors](https://flask-cors.readthedocs.io/) | `6.0.2` | Cross‑origin resource sharing | `cors` |
+| [Flask-Cors](https://corydolphin.github.io/flask-cors/) | `6.0.2` | Cross‑origin resource sharing | `cors` |
 | [pytest](https://docs.pytest.org/) | `9.0.3` | Test runner (dev/test) | `jest` / `mocha` / `supertest` |
 
 Transitive libraries installed automatically with Flask — **Werkzeug, Jinja2, MarkupSafe, ItsDangerous, Click, and Blinker** — are governed by Flask's own version constraints and are intentionally not pinned separately.
@@ -84,7 +84,7 @@ cp .env.example .env
 | `APP_CONFIG` | `development` | Selects which `Config` class `app/config.py` activates |
 | `SECRET_KEY` | *(placeholder)* | Signs session cookies / ItsDangerous tokens — set a strong random value locally |
 | `HOST` | `0.0.0.0` | Network interface the server binds to |
-| `PORT` | `3000` | TCP port the server listens on (mirrors the original `process.env.PORT`) |
+| `PORT` | `8000` | TCP port the server listens on (source‑agnostic default; adjust to the original `process.env.PORT` once supplied) |
 
 Additional, source‑derived variables (for example a database URI, a JWT secret, or a CORS origin list) are kept commented and inert in `.env.example`; you uncomment and set exactly the ones the original project used once its source is supplied.
 
@@ -95,8 +95,13 @@ Additional, source‑derived variables (for example a database URI, a JWT secret
 The project uses a local virtual environment. From the repository root:
 
 ```bash
-# 1. Create an isolated virtual environment
-python -m venv .venv
+# 1. Create an isolated virtual environment, then bootstrap pip into it.
+#    Creating the venv WITHOUT pip and installing pip explicitly works on every
+#    Python install -- including environments where the bundled `ensurepip`
+#    wheel is unavailable (there a plain `python -m venv .venv` fails). On a
+#    standard install with working `ensurepip`, `python -m venv .venv` also works.
+python3 -m venv --without-pip .venv
+python3 -m pip --python ./.venv/bin/python install --upgrade pip setuptools wheel
 
 # 2. Activate it
 source .venv/bin/activate        # Linux / macOS
@@ -126,7 +131,7 @@ Run under **gunicorn**, the production WSGI server. The application object is ex
 gunicorn wsgi:app
 
 # With an explicit bind address and worker count (host/port mirror .env: HOST/PORT)
-gunicorn --bind 0.0.0.0:3000 --workers 4 wsgi:app
+gunicorn --bind 0.0.0.0:8000 --workers 4 wsgi:app
 ```
 
 > Flask's built‑in server is **for development only** and must not be used to serve production traffic.
