@@ -1,14 +1,92 @@
-# Tooling configuration for the Artifact2 Flask application.
+# =============================================================================
+# Tooling and test configuration for the Artifact2 Flask application.
 #
-# This file currently holds only test-runner configuration so the pytest suite
-# (created under tests/ by the implementation work) discovers and runs in a
-# consistent way. It intentionally avoids declaring [project] packaging metadata
-# or dependencies — runtime dependencies are pinned in requirements.txt.
+# Project: Node.js (Express) -> Python 3 / Flask port.
+# Mandated by AAP Section 0.5.1 (Group 3: "pyproject.toml / pytest.ini --
+# Tooling and test configuration") and Section 0.6.1. `pyproject.toml` is
+# chosen over `pytest.ini` to consolidate all tooling configuration in the
+# modern, standard file.
+#
+# -----------------------------------------------------------------------------
+# SCOPE OF THIS FILE  (read before editing)
+#
+#   * This file holds ONLY tooling and test-runner configuration.
+#
+#   * It deliberately declares NO dependencies. `requirements.txt` is the single
+#     source of truth for the runtime/dev dependency set (AAP Section 0.3).
+#     Do not add [project.dependencies], [project.optional-dependencies], or any
+#     [tool.poetry.dependencies] / requirement pins here.
+#
+#   * There is intentionally NO [project] or [build-system] table. The
+#     deliverable is a runnable Flask *application*, not a distributable
+#     library, so packaging metadata is omitted to avoid implying an
+#     installable/importable package (AAP agent prompt, Phase 3 -- "preferred
+#     to OMIT [project]/[build-system] entirely").
+#
+# WHAT LIVES HERE
+#   * [tool.pytest.ini_options] -- pytest discovery + reporting (primary use).
+#   * [tool.black] / [tool.ruff] -- optional, INERT formatter/linter defaults.
+#     These install nothing and run nothing on their own; they only take effect
+#     if a developer chooses to invoke black/ruff locally. They are kept so the
+#     "tooling" half of "tooling and test configuration" is fully specified and
+#     so formatting/linting stay consistent across contributors.
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# pytest -- test discovery and reporting (primary purpose of this file).
+#
+# The tests/ tree is created by the application implementation work and is
+# organized into a unit/ + integration/ split (AAP Section 0.5.1, Group 3):
+#   tests/conftest.py     -- shared fixtures (app / test client / database)
+#   tests/unit/           -- fast service/model unit coverage
+#   tests/integration/    -- endpoint/contract coverage reproducing originals
+# -----------------------------------------------------------------------------
 [tool.pytest.ini_options]
+# Require at least the pinned pytest line (pytest==9.0.3 in requirements.txt).
 minversion = "9.0"
+
+# Confine collection to the tests/ tree so unrelated test-like files elsewhere
+# (e.g. transient scratch files at the repo root) are never collected.
 testpaths = ["tests"]
+
+# Standard discovery rules -- mirror the suite's file/class/function naming.
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+# Default command-line options applied to every run:
+#   -ra : show a short summary of all non-passing outcomes (skips/xfails/errors).
+#   -q  : quiet, concise output.
 addopts = "-ra -q"
+
+# Registered markers for the unit/integration split. Declaring them documents
+# their meaning and prevents pytest "unknown marker" warnings. Select a subset
+# at runtime, e.g.  `pytest -m unit`  or  `pytest -m "not integration"`.
+markers = [
+    "unit: fast, isolated unit tests for services and models (no external I/O).",
+    "integration: tests that exercise HTTP routes and the data layer end to end.",
+]
+
+# -----------------------------------------------------------------------------
+# Black -- opinionated code formatter (OPTIONAL; not installed by default).
+# Inert unless a developer runs `black` locally.
+# -----------------------------------------------------------------------------
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+# -----------------------------------------------------------------------------
+# Ruff -- fast linter + import sorter (OPTIONAL; not installed by default).
+# `line-length` is kept identical to Black above so the two never disagree.
+# Inert unless a developer runs `ruff` locally.
+# -----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+# A small, idiomatic rule set:
+#   E, W -> pycodestyle errors/warnings   F  -> pyflakes
+#   I    -> isort (import ordering)        UP -> pyupgrade
+#   B    -> flake8-bugbear (likely bugs)
+select = ["E", "W", "F", "I", "UP", "B"]
