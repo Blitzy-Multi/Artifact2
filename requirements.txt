@@ -1,0 +1,24 @@
+# Python dependencies for the Artifact2 Flask application.
+#
+# Runtime: Python 3.13 (Flask 3.1.x requires Python >= 3.9).
+# Version pins were verified against PyPI as the current latest stable releases.
+#
+# This project is a Node.js (Express) -> Python 3 / Flask port (see AAP §0.3).
+# The original Express server is a minimal greeting server whose only runtime
+# dependency is `express`. Therefore ONLY the CORE web stack is required here.
+# The AAP's CONDITIONAL packages (Flask-SQLAlchemy, SQLAlchemy, Flask-PyMongo,
+# PyMongo, PyJWT, bcrypt, marshmallow, requests, Flask-SocketIO, Flask-Limiter)
+# are intentionally omitted because the original source uses none of them.
+#
+# Transitive libraries installed automatically by Flask (Werkzeug, Jinja2,
+# MarkupSafe, ItsDangerous, Click, Blinker) are governed by Flask's own
+# constraints and are not pinned separately.
+
+# --- Core web framework / runtime ---
+Flask==3.1.3
+Flask-Cors==6.0.2
+python-dotenv==1.2.2
+gunicorn==26.0.0
+
+# --- Testing ---
+pytest==9.0.3

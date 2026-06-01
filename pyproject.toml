@@ -1,0 +1,14 @@
+# Tooling configuration for the Artifact2 Flask application.
+#
+# This file currently holds only test-runner configuration so the pytest suite
+# (created under tests/ by the implementation work) discovers and runs in a
+# consistent way. It intentionally avoids declaring [project] packaging metadata
+# or dependencies — runtime dependencies are pinned in requirements.txt.
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-ra -q"
