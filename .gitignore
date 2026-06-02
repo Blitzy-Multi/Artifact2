@@ -1,0 +1,3 @@
+# Node.js install artifacts
+node_modules/
+npm-debug.log*
